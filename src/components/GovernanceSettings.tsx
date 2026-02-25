@@ -23,10 +23,11 @@ interface ReportInfo {
 
 export default function GovernanceSettings() {
     const [config, setConfig] = useState<AiConfig>({ ollama_url: "http://localhost:11434", model_name: "llama3" });
-    const [status, setStatus] = useState<{ status: string; message: string }>({ status: "checking", message: "Verifying connection..." });
+    const [status, setStatus] = useState<{ status: string; message: string }>({ status: "", message: "" });
     const [reports, setReports] = useState<ReportInfo[]>([]);
     const [analyzing, setAnalyzing] = useState<string | null>(null);
     const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+    const [availableModels, setAvailableModels] = useState<string[]>([]);
 
     const fetchConfig = async () => {
         try {
@@ -42,9 +43,12 @@ export default function GovernanceSettings() {
         try {
             const res = await fetch("http://localhost:3005/api/ai/status");
             const data = await res.json();
-            setStatus(data);
+            setStatus({ status: data.status || "unknown", message: data.message || "Status check failed" });
+            if (data.available_models) {
+                setAvailableModels(data.available_models);
+            }
         } catch (err) {
-            setStatus({ status: "offline", message: "Control Room cannot reach AI Node" });
+            setStatus({ status: "offline", message: "Status check failed" });
         }
     };
 
@@ -105,9 +109,9 @@ export default function GovernanceSettings() {
         visible: { y: 0, opacity: 1 }
     };
 
-    const modelOptions = [
+    const modelOptions = availableModels.length > 0 ? availableModels : [
         "gemma3",
-        "gpt-oss-20b",
+        "gpt-oss:20b",
         "llama3",
         "mistral",
     ];
