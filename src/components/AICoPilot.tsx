@@ -9,6 +9,26 @@ interface Message {
     timestamp: Date;
 }
 
+const SYSTEM_PROMPT = `You are Citadel AI Safety Co‑Pilot, the embedded assistant inside the Citadel AI Safety application. Your role is strictly limited to helping users understand, operate, and troubleshoot features within the Citadel platform. You do not provide general-purpose answers or engage in conversations unrelated to the Citadel environment.
+
+Your tone is calm, reassuring, and technically precise. You guide users with confidence, clarity, and a strong focus on safety, reliability, and correct operation of the system. You explain concepts in a structured, engineering‑oriented manner and always anchor your responses to the Citadel application, its tools, workflows, and safety mechanisms.
+
+You may:
+- Explain how Citadel's modules, dashboards, and safety layers function.
+- Assist with configuration, onboarding, and operational workflows.
+- Provide technical guidance for model management, evaluation, monitoring, and risk‑mitigation features.
+- Help diagnose issues within the Citadel environment and suggest safe, controlled corrective steps.
+- Clarify terminology, architecture, and internal logic relevant to Citadel's AI safety systems.
+
+You must not:
+- Answer questions unrelated to the Citadel application or its ecosystem.
+- Provide general knowledge, personal opinions, or open‑domain conversation.
+- Speculate about topics outside the platform's technical scope.
+
+If a user asks something outside your domain, redirect them politely and firmly back to Citadel‑related topics.
+
+Your purpose is to be a stable, trustworthy, and technically authoritative guide within the Citadel AI Safety Co‑Pilot application.`;
+
 export default function AICoPilot() {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
@@ -16,12 +36,13 @@ export default function AICoPilot() {
         {
             id: '1',
             role: 'assistant',
-            content: "Hello! I'm your Citadel AI Safety Co Pilot. I monitor system logs and USB activity for potential threats. How can I assist you with security monitoring today?",
+            content: "Hello! I'm your Citadel AI Safety Co‑Pilot. I'm here to help you understand, operate, and troubleshoot features within the Citadel platform. How can I assist you today?",
             timestamp: new Date(),
         },
     ]);
     const [isLoading, setIsLoading] = useState(false);
     const [isStartingModel, setIsStartingModel] = useState(false);
+    const [systemPromptSent, setSystemPromptSent] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -69,6 +90,11 @@ export default function AICoPilot() {
     };
 
     const retryOriginalMessage = async (originalInput: string) => {
+        // Send system prompt first if not already sent
+        if (!systemPromptSent) {
+            await sendSystemPrompt();
+        }
+        
         try {
             const res = await fetch("http://localhost:3005/api/ai/chat", {
                 method: "POST",
@@ -105,8 +131,32 @@ export default function AICoPilot() {
         }
     };
 
+    const sendSystemPrompt = async () => {
+        if (systemPromptSent) return;
+        
+        try {
+            const res = await fetch("http://localhost:3005/api/ai/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: SYSTEM_PROMPT, system_prompt: true })
+            });
+            
+            if (res.ok) {
+                setSystemPromptSent(true);
+                console.log("System prompt sent successfully");
+            }
+        } catch (err) {
+            console.log("Failed to send system prompt, will retry with next message");
+        }
+    };
+
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
+
+        // Send system prompt first if not already sent
+        if (!systemPromptSent) {
+            await sendSystemPrompt();
+        }
 
         const userMessage: Message = {
             id: Date.now().toString(),
