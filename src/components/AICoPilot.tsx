@@ -16,7 +16,7 @@ export default function AICoPilot() {
         {
             id: '1',
             role: 'assistant',
-            content: "Hello! I'm your Citadel AI Safety Co-Pilot. I monitor system logs and USB activity for potential threats. How can I assist you with security monitoring today?",
+            content: "Hello! I'm your Citadel AI Safety Co Pilot. I monitor system logs and USB activity for potential threats. How can I assist you with security monitoring today?",
             timestamp: new Date(),
         },
     ]);

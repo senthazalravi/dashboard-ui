@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, Eye, EyeOff } from 'lucide-react';
 
 interface LoginProps {
   onLogin: () => void;
@@ -36,9 +36,9 @@ export default function Login({ onLogin }: LoginProps) {
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-600/30 mx-auto mb-4">
-            <Shield className="w-8 h-8 text-white" />
+            <img src="/logo.png" alt="Citadel" className="w-10 h-10 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Citadel SOC</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Citadel AI Safety Co Pilot</h1>
           <p className="text-blue-200 text-sm">Hardware Safety Co-Pilot</p>
         </div>
 

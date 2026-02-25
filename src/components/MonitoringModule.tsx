@@ -2,8 +2,6 @@ import { motion } from "framer-motion";
 import {
     Shield,
     Activity,
-    Info,
-    Cpu,
     HardDrive,
     Zap,
     Mic,
@@ -15,21 +13,8 @@ import {
     Keyboard,
     ShieldCheck,
     Search,
-    Filter,
-    ArrowUpRight,
     Clock,
-    Server
 } from "lucide-react";
-
-interface SubDevice {
-    name: string;
-    status: "Secure" | "Monitoring" | "Warning";
-}
-
-interface MonitoringParam {
-    label: string;
-    value: string;
-}
 
 interface CategoryData {
     title: string;

@@ -27,11 +27,7 @@ interface ReportInfo {
   created_at: string;
 }
 
-interface MachineProps {
-  hideSidebar?: boolean;
-}
-
-export default function Machine({ hideSidebar }: MachineProps) {
+export default function Machine() {
   const [usbEvents, setUsbEvents] = useState<UsbEvent[]>([]);
   const [eventLogs, setEventLogs] = useState<EventLog[]>([]);
   const [reports, setReports] = useState<ReportInfo[]>([]);
@@ -436,7 +432,7 @@ export default function Machine({ hideSidebar }: MachineProps) {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setViewingReport(report.filename)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-900 text-white border border-slate-900 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         View
@@ -444,7 +440,7 @@ export default function Machine({ hideSidebar }: MachineProps) {
                       <a
                         href={`http://localhost:3005/api/reports/${report.filename}`}
                         download
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white text-slate-700 border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-900 text-white border border-slate-900 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors"
                       >
                         <Download className="w-3.5 h-3.5" />
                         Save

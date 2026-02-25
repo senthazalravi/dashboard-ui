@@ -12,9 +12,12 @@ import WirelessMonitoring from "./components/WirelessMonitoring";
 import PowerMonitoring from "./components/PowerMonitoring";
 import PrintingMonitoring from "./components/PrintingMonitoring";
 import SystemOversight from "./components/SystemOversight";
+import FirmwareMonitoring from "./components/FirmwareMonitoring";
+import VirtualLogicalMonitoring from "./components/VirtualLogicalMonitoring";
 import Fleet from "./Fleet";
 import GovernanceSettings from "./components/GovernanceSettings";
 import Login from "./components/Login";
+import AICoPilot from "./components/AICoPilot";
 import './App.css';
 
 function App() {
@@ -57,11 +60,15 @@ function App() {
         {activeTab === 'wireless-detailed' && <MonitoringModule category="wireless" />}
         {activeTab === 'power-detailed' && <MonitoringModule category="power" />}
         {activeTab === 'printing-detailed' && <MonitoringModule category="printing" />}
-        {activeTab === 'firmware' && <MonitoringModule category="firmware" />}
-        {activeTab === 'virtual' && <MonitoringModule category="virtual" />}
+        {activeTab === 'firmware-overview' && <FirmwareMonitoring mode="overview" />}
+        {activeTab === 'firmware-details' && <FirmwareMonitoring mode="details" />}
+        {activeTab === 'virtual-overview' && <VirtualLogicalMonitoring mode="overview" />}
+        {activeTab === 'virtual-details' && <VirtualLogicalMonitoring mode="details" />}
         {activeTab === 'fleet' && <Fleet />}
         {activeTab === 'settings' && <GovernanceSettings />}
       </main>
+
+      <AICoPilot />
     </div>
   );
 }

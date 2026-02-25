@@ -1,15 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Shield,
     Settings,
-    Cpu,
-    Zap,
-    Activity,
-    Search,
-    Filter,
     FileText,
-    Eye,
     BrainCircuit,
     RefreshCcw,
     CheckCircle2,
@@ -112,6 +105,13 @@ export default function GovernanceSettings() {
         visible: { y: 0, opacity: 1 }
     };
 
+    const modelOptions = [
+        "gemma3",
+        "gpt-oss-20b",
+        "llama3",
+        "mistral",
+    ];
+
     return (
         <div className="p-8 max-w-7xl mx-auto relative z-10">
             <motion.div initial="hidden" animate="visible" variants={containerVariants}>
@@ -142,18 +142,23 @@ export default function GovernanceSettings() {
                                     type="text"
                                     value={config.ollama_url}
                                     onChange={(e) => setConfig({ ...config, ollama_url: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 capitalize mb-1.5 tracking-widest uppercase">Active Model</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={config.model_name}
                                     onChange={(e) => setConfig({ ...config, model_name: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
-                                />
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
+                                >
+                                    {modelOptions.map((m) => (
+                                        <option key={m} value={m}>
+                                            {m}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className={`p-4 rounded-2xl flex items-center gap-3 border ${status.status === 'online' ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'

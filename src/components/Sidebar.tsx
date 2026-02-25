@@ -60,9 +60,9 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarPr
       <div className="p-6 shrink-0">
         <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20">
-            <Server className="w-5 h-5 text-white" />
+            <img src="/logo.png" alt="Citadel" className="w-5 h-5 object-contain" />
           </div>
-          Citadel SOC
+          Citadel AI Safety Co Pilot
         </h1>
         <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-[0.2em] font-black">Hardware Safety Co-Pilot</p>
       </div>
@@ -94,8 +94,10 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarPr
         <NavItem id="power-detailed" icon={Zap} label="Power & Topology Details" color="yellow" badge="H" />
         <NavItem id="printing" icon={Printer} label="Printing & Scanning Overview" color="orange" />
         <NavItem id="printing-detailed" icon={Printer} label="Printing & Scanning Details" color="orange" badge="H" />
-        <NavItem id="firmware" icon={ShieldCheck} label="BIOS & Firmware" color="cyan" />
-        <NavItem id="virtual" icon={Box} label="Virtual Interfaces" color="fuchsia" />
+        <NavItem id="firmware-overview" icon={ShieldCheck} label="BIOS & Firmware Overview" color="cyan" />
+        <NavItem id="firmware-details" icon={ShieldCheck} label="BIOS & Firmware Details" color="cyan" badge="H" />
+        <NavItem id="virtual-overview" icon={Box} label="Virtual & Logical Overview" color="fuchsia" />
+        <NavItem id="virtual-details" icon={Box} label="Virtual & Logical Details" color="fuchsia" badge="H" />
 
         <SectionHeader label="System Configuration" />
         <NavItem id="fleet" icon={Server} label="Fleet Management" color="slate" badge="Soon" />

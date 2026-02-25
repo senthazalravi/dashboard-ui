@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Usb, Activity, Clock, Server, Shield, Zap, Info, Search, Filter, ArrowUpRight } from "lucide-react";
+import { Usb, Activity, Clock, Server, Shield, Zap, Info, Search, Filter } from "lucide-react";
 import AICoPilot from "./AICoPilot";
 
 interface UsbEvent {
