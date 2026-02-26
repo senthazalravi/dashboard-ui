@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Database, Activity, AlertTriangle, CheckCircle, Play, Download, Settings, Server } from 'lucide-react';
+import { Shield, Database, Activity, AlertTriangle, CheckCircle, Play, Download, Settings, Server, Clock, Calendar } from 'lucide-react';
 
 interface LogCollectionResponse {
   status: string;
@@ -27,7 +27,7 @@ export default function LogCollection() {
   const [error, setError] = useState<string | null>(null);
   const [selectedHours, setSelectedHours] = useState<number>(24);
 
-  const collectLogs = async () => {
+  const collectLogs = async (hours: number = 24) => {
     setIsCollecting(true);
     setCollectionStatus('Initializing log collection...');
     setError(null);
@@ -38,6 +38,7 @@ export default function LogCollection() {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ hours }),
       });
       
       if (!response.ok) {
