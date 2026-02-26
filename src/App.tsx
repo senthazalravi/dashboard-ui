@@ -18,6 +18,8 @@ import Fleet from "./Fleet";
 import GovernanceSettings from "./components/GovernanceSettings";
 import Login from "./components/Login";
 import AICoPilot from "./components/AICoPilot";
+import EventLogs from "./components/EventLogs";
+import LogCollection from "./components/LogCollection";
 import './App.css';
 
 function App() {
@@ -64,6 +66,8 @@ function App() {
         {activeTab === 'firmware-details' && <FirmwareMonitoring mode="details" />}
         {activeTab === 'virtual-overview' && <VirtualLogicalMonitoring mode="overview" />}
         {activeTab === 'virtual-details' && <VirtualLogicalMonitoring mode="details" />}
+        {activeTab === 'logs' && <EventLogs />}
+        {activeTab === 'log-collection' && <LogCollection />}
         {activeTab === 'fleet' && <Fleet />}
         {activeTab === 'settings' && <GovernanceSettings />}
       </main>
