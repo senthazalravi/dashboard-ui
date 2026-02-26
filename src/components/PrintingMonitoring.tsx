@@ -15,7 +15,8 @@ import {
     Shield,
     Settings,
     FileText,
-    Network
+    Network,
+    Download,
 } from 'lucide-react';
 
 interface PrintingDevice {
@@ -91,6 +92,75 @@ const PrintingMonitoring = () => {
         }
     };
 
+    const savePrintingOverview = async () => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    connected_devices: devices.filter(d => d.is_connected).length,
+                    powered_devices: devices.filter(d => d.is_powered).length,
+                    active_printing: devices.filter(d => d.is_printing).length,
+                    active_scanning: devices.filter(d => d.is_scanning).length,
+                    total_events: events.length,
+                    device_types: [...new Set(devices.map(d => d.device_type))],
+                    network_printers: devices.filter(d => d.network_address !== null).length,
+                    color_printers: devices.filter(d => d.color_capability).length
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    device_name: device.device_name,
+                    device_id: device.device_id,
+                    is_connected: device.is_connected,
+                    is_powered: device.is_powered,
+                    is_printing: device.is_printing,
+                    is_scanning: device.is_scanning,
+                    is_copying: device.is_copying,
+                    paper_tray_count: device.paper_tray_count,
+                    paper_level: device.paper_level,
+                    ink_level: device.ink_level,
+                    resolution: device.resolution,
+                    color_capability: device.color_capability,
+                    duplex_capability: device.duplex_capability,
+                    network_address: device.network_address,
+                    port_name: device.port_name,
+                    driver_version: device.driver_version,
+                    last_seen: device.last_seen,
+                    status: device.status,
+                    security_flags: device.security_flags
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_id: event.device_id,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-printing-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Printing overview saved:', result.filename);
+            } else {
+                console.error('Failed to save printing overview');
+            }
+        } catch (error) {
+            console.error('Error saving printing overview:', error);
+        }
+    };
+
     const triggerScan = async () => {
         try {
             setScanning(true);
@@ -104,8 +174,20 @@ const PrintingMonitoring = () => {
                 return;
             }
             
-            setTimeout(() => {
-                fetchPrintingData();
+            // Wait for scan to complete, then refresh data and save overview
+            setTimeout(async () => {
+                const [devicesRes, eventsRes] = await Promise.all([
+                    fetch('http://localhost:3005/api/printing/devices'),
+                    fetch('http://localhost:3005/api/printing/events')
+                ]);
+                
+                const devicesData = await devicesRes.json();
+                const eventsData = await eventsRes.json();
+                
+                setDevices(devicesData);
+                setEvents(eventsData);
+                
+                await savePrintingOverview(devicesData, eventsData);
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -419,14 +501,23 @@ const PrintingMonitoring = () => {
                         />
                     </div>
                 </div>
-                <button
-                    onClick={triggerScan}
-                    disabled={scanning}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-                    {scanning ? 'Scanning...' : 'Scan Devices'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={savePrintingOverview}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Save Overview
+                    </button>
+                    <button
+                        onClick={triggerScan}
+                        disabled={scanning}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
+                        {scanning ? 'Scanning...' : 'Scan Devices'}
+                    </button>
+                </div>
             </div>
 
             {/* Device Grid */}

@@ -17,7 +17,8 @@ import {
     Shield,
     Zap,
     Signal,
-    Battery
+    Battery,
+    Download,
 } from 'lucide-react';
 
 interface WirelessDevice {
@@ -87,6 +88,65 @@ const WirelessMonitoring = () => {
         }
     };
 
+    const saveWirelessOverview = async () => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    connected_devices: devices.filter(d => d.is_connected).length,
+                    active_devices: devices.filter(d => d.is_active).length,
+                    total_events: events.length,
+                    device_types: [...new Set(devices.map(d => d.device_type))],
+                    bluetooth_devices: devices.filter(d => d.device_type.includes('Bluetooth')).length,
+                    wifi_devices: devices.filter(d => d.device_type.includes('Wi-Fi')).length
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    device_name: device.device_name,
+                    device_id: device.device_id,
+                    is_connected: device.is_connected,
+                    is_active: device.is_active,
+                    signal_strength: device.signal_strength,
+                    frequency: device.frequency,
+                    protocol: device.protocol,
+                    battery_level: device.battery_level,
+                    last_seen: device.last_seen,
+                    status: device.status,
+                    security_flags: device.security_flags
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_id: event.device_id,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-wireless-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Wireless overview saved:', result.filename);
+            } else {
+                console.error('Failed to save wireless overview');
+            }
+        } catch (error) {
+            console.error('Error saving wireless overview:', error);
+        }
+    };
+
     const triggerScan = async () => {
         try {
             setScanning(true);
@@ -100,9 +160,20 @@ const WirelessMonitoring = () => {
                 return;
             }
             
-            // Wait for scan to complete, then refresh data
-            setTimeout(() => {
-                fetchWirelessData();
+            // Wait for scan to complete, then refresh data and save overview
+            setTimeout(async () => {
+                const [devicesRes, eventsRes] = await Promise.all([
+                    fetch('http://localhost:3005/api/wireless/devices'),
+                    fetch('http://localhost:3005/api/wireless/events')
+                ]);
+                
+                const devicesData = await devicesRes.json();
+                const eventsData = await eventsRes.json();
+                
+                setDevices(devicesData);
+                setEvents(eventsData);
+                
+                await saveWirelessOverview(devicesData, eventsData);
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -387,14 +458,23 @@ const WirelessMonitoring = () => {
                         />
                     </div>
                 </div>
-                <button
-                    onClick={triggerScan}
-                    disabled={scanning}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-                    {scanning ? 'Scanning...' : 'Scan Devices'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={saveWirelessOverview}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Save Overview
+                    </button>
+                    <button
+                        onClick={triggerScan}
+                        disabled={scanning}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
+                        {scanning ? 'Scanning...' : 'Scan Devices'}
+                    </button>
+                </div>
             </div>
 
             {/* Device Grid */}

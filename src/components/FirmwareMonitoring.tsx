@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Download,
 } from "lucide-react";
 
 type TriState = "ENABLED" | "DISABLED" | "UNKNOWN";
@@ -207,6 +208,48 @@ export default function FirmwareMonitoring({ mode = "overview" }: { mode?: "over
     fetchFirmware();
   }, []);
 
+  const saveFirmwareOverview = async () => {
+        try {
+            if (!payload) {
+                console.error('No firmware data available to save');
+                return;
+            }
+
+            const overview = {
+                timestamp: new Date().toISOString(),
+                node_id: payload.node_id,
+                last_check: payload.last_check,
+                overall_health: payload.overall_health,
+                secure_boot: payload.secure_boot,
+                tpm: payload.tpm,
+                firmware_hash: payload.firmware_hash,
+                option_rom: payload.option_rom,
+                uefi_updates: payload.uefi_updates,
+                firmware_hash_measurements: payload.firmware_hash?.measurements || [],
+                uefi_update_events: payload.uefi_updates?.events || [],
+                option_rom_events: payload.option_rom?.events || []
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-firmware-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Firmware overview saved:', result.filename);
+            } else {
+                console.error('Failed to save firmware overview');
+            }
+        } catch (error) {
+            console.error('Error saving firmware overview:', error);
+        }
+    };
+
   const onRefresh = async () => {
     try {
       setRefreshing(true);
@@ -256,14 +299,24 @@ export default function FirmwareMonitoring({ mode = "overview" }: { mode?: "over
             <healthBadge.icon className="w-4 h-4" />
             {healthBadge.label}
           </div>
-          <button
-            onClick={onRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:shadow-sm transition-all disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={saveFirmwareOverview}
+              disabled={!payload}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              Save Overview
+            </button>
+            <button
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:shadow-sm transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+          </div>
         </div>
       </motion.header>
 

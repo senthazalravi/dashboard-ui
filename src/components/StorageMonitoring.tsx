@@ -74,15 +74,79 @@ export default function StorageMonitoring() {
         }
     };
 
+    const saveStorageOverview = async (devices: StorageDevice[], events: StorageEvent[]) => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    connected_devices: devices.filter(d => d.is_connected).length,
+                    total_events: events.length,
+                    storage_types: [...new Set(devices.map(d => d.device_type))],
+                    total_capacity_gb: devices.reduce((sum, d) => sum + (d.capacity_bytes / (1024 * 1024 * 1024)), 0)
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    serial_number: device.serial_number,
+                    capacity_bytes: device.capacity_bytes,
+                    capacity_gb: device.capacity_bytes / (1024 * 1024 * 1024),
+                    is_connected: device.is_connected,
+                    mount_point: device.mount_point,
+                    last_seen: device.last_seen,
+                    status: device.status
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_serial: event.device_serial,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-storage-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Storage overview saved:', result.filename);
+            } else {
+                console.error('Failed to save storage overview');
+            }
+        } catch (error) {
+            console.error('Error saving storage overview:', error);
+        }
+    };
+
     const triggerScan = async () => {
         try {
             setScanning(true);
             await fetch('http://localhost:3005/api/storage/scan', {
                 method: 'POST'
             });
-            // Wait a moment for scan to complete, then refresh data
-            setTimeout(() => {
-                fetchStorageData();
+            // Wait a moment for scan to complete, then refresh data and save overview
+            setTimeout(async () => {
+                const [devicesRes, eventsRes] = await Promise.all([
+                    fetch('http://localhost:3005/api/storage/devices'),
+                    fetch('http://localhost:3005/api/storage/events')
+                ]);
+                
+                const devicesData = await devicesRes.json();
+                const eventsData = await eventsRes.json();
+                
+                setDevices(devicesData);
+                setEvents(eventsData);
+                
+                await saveStorageOverview(devicesData, eventsData);
                 setScanning(false);
             }, 3000);
         } catch (error) {

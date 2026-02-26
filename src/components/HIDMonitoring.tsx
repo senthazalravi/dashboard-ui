@@ -15,7 +15,8 @@ import {
     AlertTriangle,
     CheckCircle,
     XCircle,
-    TriangleAlert
+    TriangleAlert,
+    Download,
 } from 'lucide-react';
 
 interface HIDDevice {
@@ -75,15 +76,82 @@ export default function HIDMonitoring() {
         }
     };
 
+    const saveHidOverview = async () => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    connected_devices: devices.filter(d => d.is_connected).length,
+                    total_events: events.length,
+                    device_types: [...new Set(devices.map(d => d.device_type))],
+                    suspicious_devices: devices.filter(d => {
+                        return d.vendor_id === "UNKNOWN" || 
+                               d.device_type.includes("Unknown") ||
+                               d.status === "ERROR";
+                    }).length
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    serial_number: device.serial_number,
+                    device_name: device.device_name,
+                    is_connected: device.is_connected,
+                    last_seen: device.last_seen,
+                    status: device.status,
+                    device_path: device.device_path
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_serial: event.device_serial,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-hid-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('HID overview saved:', result.filename);
+            } else {
+                console.error('Failed to save HID overview');
+            }
+        } catch (error) {
+            console.error('Error saving HID overview:', error);
+        }
+    };
+
     const triggerScan = async () => {
         try {
             setScanning(true);
             await fetch('http://localhost:3005/api/hid/scan', {
                 method: 'POST'
             });
-            // Wait a moment for scan to complete, then refresh data
-            setTimeout(() => {
-                fetchHIDData();
+            // Wait a moment for scan to complete, then refresh data and save overview
+            setTimeout(async () => {
+                const [devicesRes, eventsRes] = await Promise.all([
+                    fetch('http://localhost:3005/api/hid/devices'),
+                    fetch('http://localhost:3005/api/hid/events')
+                ]);
+                
+                const devicesData = await devicesRes.json();
+                const eventsData = await eventsRes.json();
+                
+                setDevices(devicesData);
+                setEvents(eventsData);
+                
+                await saveHidOverview(devicesData, eventsData);
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -240,6 +308,14 @@ export default function HIDMonitoring() {
                         </h1>
                         <p className="text-slate-400">Real-time monitoring of keyboards, mice, gaming controllers, and security devices</p>
                     </div>
+                    <div className="flex items-center gap-3">
+                    <button
+                        onClick={saveHidOverview}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Save Overview
+                    </button>
                     <button
                         onClick={triggerScan}
                         disabled={scanning}
@@ -248,6 +324,7 @@ export default function HIDMonitoring() {
                         <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
                         {scanning ? 'Scanning...' : 'Scan Now'}
                     </button>
+                </div>
                 </div>
             </div>
 

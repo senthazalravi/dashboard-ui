@@ -16,7 +16,8 @@ import {
     Power,
     Zap as Thunderbolt,
     Cpu,
-    Database
+    Database,
+    Download,
 } from 'lucide-react';
 
 interface PowerDevice {
@@ -88,6 +89,66 @@ const PowerMonitoring = () => {
         }
     };
 
+    const savePowerOverview = async () => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    powered_devices: devices.filter(d => d.is_powered).length,
+                    total_events: events.length,
+                    device_types: [...new Set(devices.map(d => d.device_type))],
+                    battery_devices: devices.filter(d => d.battery_level !== null).length,
+                    ups_devices: devices.filter(d => d.device_type.includes('UPS')).length
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    device_name: device.device_name,
+                    device_id: device.device_id,
+                    is_connected: device.is_connected,
+                    is_powered: device.is_powered,
+                    power_consumption: device.power_consumption,
+                    voltage: device.voltage,
+                    amperage: device.amperage,
+                    capacity: device.capacity,
+                    battery_level: device.battery_level,
+                    port_count: device.port_count,
+                    last_seen: device.last_seen,
+                    status: device.status,
+                    security_flags: device.security_flags
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_id: event.device_id,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-power-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Power overview saved:', result.filename);
+            } else {
+                console.error('Failed to save power overview');
+            }
+        } catch (error) {
+            console.error('Error saving power overview:', error);
+        }
+    };
+
     const triggerScan = async () => {
         try {
             setScanning(true);
@@ -101,9 +162,20 @@ const PowerMonitoring = () => {
                 return;
             }
             
-            // Wait for scan to complete, then refresh data
-            setTimeout(() => {
-                fetchPowerData();
+            // Wait for scan to complete, then refresh data and save overview
+            setTimeout(async () => {
+                const [devicesRes, eventsRes] = await Promise.all([
+                    fetch('http://localhost:3005/api/power/devices'),
+                    fetch('http://localhost:3005/api/power/events')
+                ]);
+                
+                const devicesData = await devicesRes.json();
+                const eventsData = await eventsRes.json();
+                
+                setDevices(devicesData);
+                setEvents(eventsData);
+                
+                await savePowerOverview(devicesData, eventsData);
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -400,14 +472,23 @@ const PowerMonitoring = () => {
                         />
                     </div>
                 </div>
-                <button
-                    onClick={triggerScan}
-                    disabled={scanning}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-                    {scanning ? 'Scanning...' : 'Scan Devices'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={savePowerOverview}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Save Overview
+                    </button>
+                    <button
+                        onClick={triggerScan}
+                        disabled={scanning}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
+                        {scanning ? 'Scanning...' : 'Scan Devices'}
+                    </button>
+                </div>
             </div>
 
             {/* Device Grid */}

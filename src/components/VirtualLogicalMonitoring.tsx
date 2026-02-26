@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Download,
 } from "lucide-react";
 
 type Mode = "overview" | "details";
@@ -88,6 +89,62 @@ export default function VirtualLogicalMonitoring({ mode }: { mode: Mode }) {
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState("");
 
+  const saveVirtualOverview = async () => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    present_devices: devices.filter(d => d.is_present).length,
+                    total_events: events.length,
+                    device_classes: [...new Set(devices.map(d => d.device_class))],
+                    device_types: [...new Set(devices.map(d => d.device_type))],
+                    hypervisor_devices: devices.filter(d => d.device_class === 'hypervisor').length,
+                    network_devices: devices.filter(d => d.device_class === 'network').length
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_class: device.device_class,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    device_name: device.device_name,
+                    device_id: device.device_id,
+                    is_present: device.is_present,
+                    last_seen: device.last_seen,
+                    status: device.status,
+                    security_flags: safeParseFlags(device.security_flags),
+                    raw_json: device.raw_json
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_type: event.device_type,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-virtual-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Virtual overview saved:', result.filename);
+            } else {
+                console.error('Failed to save virtual overview');
+            }
+        } catch (error) {
+            console.error('Error saving virtual overview:', error);
+        }
+    };
+
   const fetchAll = async () => {
     try {
       setLoading(true);
@@ -120,6 +177,7 @@ export default function VirtualLogicalMonitoring({ mode }: { mode: Mode }) {
     try {
       setRefreshing(true);
       await fetchAll();
+      await saveVirtualOverview();
     } finally {
       setRefreshing(false);
     }
@@ -196,6 +254,14 @@ export default function VirtualLogicalMonitoring({ mode }: { mode: Mode }) {
             />
           </div>
 
+          <div className="flex items-center gap-3">
+          <button
+            onClick={saveVirtualOverview}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition-all"
+          >
+            <Download className="w-4 h-4" />
+            Save Overview
+          </button>
           <button
             onClick={onRefresh}
             disabled={refreshing}
@@ -204,6 +270,7 @@ export default function VirtualLogicalMonitoring({ mode }: { mode: Mode }) {
             <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             Refresh
           </button>
+        </div>
         </div>
       </motion.header>
 

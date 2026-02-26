@@ -19,6 +19,26 @@ interface CollectionStats {
   security_collection_success?: boolean;
 }
 
+interface EventRecord {
+  timestamp: string;
+  level: number;
+  channel: string;
+  provider: string;
+  event_id: number;
+  message: string;
+  computer_name: string;
+  user?: string;
+}
+
+interface DeviceRecord {
+  description: string;
+  device_class: string;
+  manufacturer: string;
+  status: string;
+  hardware_id: string;
+  friendly_name?: string;
+}
+
 export default function LogCollection() {
   const [isCollecting, setIsCollecting] = useState(false);
   const [collectionStatus, setCollectionStatus] = useState('');
@@ -26,6 +46,26 @@ export default function LogCollection() {
   const [stats, setStats] = useState<CollectionStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedHours, setSelectedHours] = useState<number>(24);
+  const [events, setEvents] = useState<EventRecord[]>([]);
+  const [devices, setDevices] = useState<DeviceRecord[]>([]);
+
+  const loadCollectedData = async () => {
+    try {
+      // Load comprehensive events
+      const comprehensiveResponse = await fetch('http://localhost:3005/api/logs/comprehensive');
+      if (comprehensiveResponse.ok) {
+        const comprehensiveData = await comprehensiveResponse.json();
+        if (comprehensiveData.events) {
+          setEvents(prev => [...prev, ...comprehensiveData.events]);
+        }
+        if (comprehensiveData.devices) {
+          setDevices(prev => [...prev, ...comprehensiveData.devices]);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load collected data:', err);
+    }
+  };
 
   const collectLogs = async (hours: number = 24) => {
     setIsCollecting(true);
@@ -33,7 +73,7 @@ export default function LogCollection() {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:3000/api/trigger-log-collector', {
+      const response = await fetch('http://localhost:3005/api/trigger-log-collector', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,6 +87,9 @@ export default function LogCollection() {
       
       const data = await response.json();
       setStats(data.statistics);
+      
+      // Load the actual collected data
+      await loadCollectedData();
       
       // Show admin privilege status
       if (data.statistics?.admin_privileges) {
@@ -231,6 +274,104 @@ export default function LogCollection() {
               <div className="text-xs text-slate-500">{new Date(lastCollection).toLocaleString()}</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Events Table */}
+      {events.length > 0 && (
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Collected Events ({events.length})</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-300">
+              <thead className="text-xs text-slate-400 uppercase bg-slate-700/50">
+                <tr>
+                  <th className="px-4 py-3">Timestamp</th>
+                  <th className="px-4 py-3">Level</th>
+                  <th className="px-4 py-3">Channel</th>
+                  <th className="px-4 py-3">Provider</th>
+                  <th className="px-4 py-3">Event ID</th>
+                  <th className="px-4 py-3">Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.slice(0, 50).map((event, index) => (
+                  <tr key={index} className="border-b border-slate-700 hover:bg-slate-700/30">
+                    <td className="px-4 py-3 text-xs">{new Date(event.timestamp).toLocaleString()}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        event.level === 1 ? 'bg-red-900/50 text-red-400' :
+                        event.level === 2 ? 'bg-orange-900/50 text-orange-400' :
+                        event.level === 3 ? 'bg-yellow-900/50 text-yellow-400' :
+                        'bg-blue-900/50 text-blue-400'
+                      }`}>
+                        {event.level === 1 ? 'Critical' :
+                         event.level === 2 ? 'Error' :
+                         event.level === 3 ? 'Warning' : 'Info'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">{event.channel}</td>
+                    <td className="px-4 py-3">{event.provider}</td>
+                    <td className="px-4 py-3">{event.event_id}</td>
+                    <td className="px-4 py-3 max-w-xs truncate" title={event.message}>{event.message}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {events.length > 50 && (
+            <div className="mt-4 text-center text-sm text-slate-400">
+              Showing first 50 events of {events.length} total
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Devices Table */}
+      {devices.length > 0 && (
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Discovered Devices ({devices.length})</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-slate-300">
+              <thead className="text-xs text-slate-400 uppercase bg-slate-700/50">
+                <tr>
+                  <th className="px-4 py-3">Description</th>
+                  <th className="px-4 py-3">Device Class</th>
+                  <th className="px-4 py-3">Manufacturer</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Hardware ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {devices.slice(0, 50).map((device, index) => (
+                  <tr key={index} className="border-b border-slate-700 hover:bg-slate-700/30">
+                    <td className="px-4 py-3 font-medium">{device.description}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-1 bg-blue-900/50 text-blue-400 rounded text-xs">
+                        {device.device_class}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">{device.manufacturer}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        device.status === 'Working' ? 'bg-green-900/50 text-green-400' :
+                        'bg-red-900/50 text-red-400'
+                      }`}>
+                        {device.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 max-w-xs truncate font-mono text-xs" title={device.hardware_id}>
+                      {device.hardware_id}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {devices.length > 50 && (
+            <div className="mt-4 text-center text-sm text-slate-400">
+              Showing first 50 devices of {devices.length} total
+            </div>
+          )}
         </div>
       )}
 

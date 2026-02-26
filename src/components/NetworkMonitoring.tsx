@@ -16,7 +16,8 @@ import {
     CheckCircle,
     XCircle,
     TriangleAlert,
-    AlertCircle
+    AlertCircle,
+    Download,
 } from 'lucide-react';
 
 interface NetworkDevice {
@@ -79,15 +80,81 @@ export default function NetworkMonitoring() {
         }
     };
 
+    const saveNetworkOverview = async () => {
+        try {
+            const overview = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    total_devices: devices.length,
+                    connected_devices: devices.filter(d => d.is_connected).length,
+                    total_events: events.length,
+                    device_types: [...new Set(devices.map(d => d.device_type))],
+                    wireless_devices: devices.filter(d => d.connection_type.includes('Wi-Fi' || d.connection_type.includes('Bluetooth')).length,
+                    ethernet_devices: devices.filter(d => d.connection_type.includes('Ethernet')).length
+                },
+                devices: devices.map(device => ({
+                    id: device.id,
+                    device_type: device.device_type,
+                    vendor_id: device.vendor_id,
+                    product_id: device.product_id,
+                    mac_address: device.mac_address,
+                    interface_name: device.interface_name,
+                    is_connected: device.is_connected,
+                    ip_address: device.ip_address,
+                    connection_type: device.connection_type,
+                    last_seen: device.last_seen,
+                    status: device.status,
+                    security_flags: device.security_flags
+                })),
+                events: events.map(event => ({
+                    id: event.id,
+                    device_mac: event.device_mac,
+                    event_type: event.event_type,
+                    timestamp: event.timestamp,
+                    details: event.details
+                }))
+            };
+
+            // Save to JSON file via API
+            const response = await fetch('http://localhost:3005/api/save-network-overview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(overview)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Network overview saved:', result.filename);
+            } else {
+                console.error('Failed to save network overview');
+            }
+        } catch (error) {
+            console.error('Error saving network overview:', error);
+        }
+    };
+
     const triggerScan = async () => {
         try {
             setScanning(true);
             await fetch('http://localhost:3005/api/network/scan', {
                 method: 'POST'
             });
-            // Wait a moment for scan to complete, then refresh data
-            setTimeout(() => {
-                fetchNetworkData();
+            // Wait a moment for scan to complete, then refresh data and save overview
+            setTimeout(async () => {
+                const [devicesRes, eventsRes] = await Promise.all([
+                    fetch('http://localhost:3005/api/network/devices'),
+                    fetch('http://localhost:3005/api/network/events')
+                ]);
+                
+                const devicesData = await devicesRes.json();
+                const eventsData = await eventsRes.json();
+                
+                setDevices(devicesData);
+                setEvents(eventsData);
+                
+                await saveNetworkOverview(devicesData, eventsData);
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -276,6 +343,14 @@ export default function NetworkMonitoring() {
                         </h1>
                         <p className="text-slate-400">Real-time monitoring of network adapters and communication interfaces</p>
                     </div>
+                    <div className="flex items-center gap-3">
+                    <button
+                        onClick={saveNetworkOverview}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    >
+                        <Download className="w-4 h-4" />
+                        Save Overview
+                    </button>
                     <button
                         onClick={triggerScan}
                         disabled={scanning}
@@ -284,6 +359,7 @@ export default function NetworkMonitoring() {
                         <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
                         {scanning ? 'Scanning...' : 'Scan Now'}
                     </button>
+                </div>
                 </div>
             </div>
 
