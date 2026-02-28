@@ -151,7 +151,7 @@ export default function HIDMonitoring() {
                 setDevices(devicesData);
                 setEvents(eventsData);
                 
-                await saveHidOverview(devicesData, eventsData);
+                await saveHidOverview();
                 setScanning(false);
             }, 3000);
         } catch (error) {

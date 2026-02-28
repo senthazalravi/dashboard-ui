@@ -89,7 +89,7 @@ export default function NetworkMonitoring() {
                     connected_devices: devices.filter(d => d.is_connected).length,
                     total_events: events.length,
                     device_types: [...new Set(devices.map(d => d.device_type))],
-                    wireless_devices: devices.filter(d => d.connection_type.includes('Wi-Fi' || d.connection_type.includes('Bluetooth')).length,
+                    wireless_devices: devices.filter(d => d.connection_type.includes('Wi-Fi') || d.connection_type.includes('Bluetooth')).length,
                     ethernet_devices: devices.filter(d => d.connection_type.includes('Ethernet')).length
                 },
                 devices: devices.map(device => ({
@@ -154,7 +154,7 @@ export default function NetworkMonitoring() {
                 setDevices(devicesData);
                 setEvents(eventsData);
                 
-                await saveNetworkOverview(devicesData, eventsData);
+                await saveNetworkOverview();
                 setScanning(false);
             }, 3000);
         } catch (error) {

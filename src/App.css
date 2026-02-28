@@ -11,7 +11,7 @@
   --text-muted: #94a3b8;
   --border-dim: #1e293b;
   --border-bright: #334155;
-  --sidebar-width: 280px;
+  --sidebar-width: 320px;
 }
 
 * {
@@ -118,6 +118,24 @@ html, body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--border-bright);
+}
+
+/* Dark scrollbar for sidebar */
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8);
+  border-radius: 3px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.9);
 }
 
 .citadel-grid {

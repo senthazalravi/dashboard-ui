@@ -16,7 +16,9 @@ import {
   Monitor,
   LogOut,
   FileText,
-  Activity
+  Activity,
+  Brain,
+  Clock
 } from "lucide-react";
 
 interface SidebarProps {
@@ -102,6 +104,8 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarPr
         <NavItem id="virtual-details" icon={Box} label="Virtual & Logical Details" color="fuchsia" badge="H" />
 
         <SectionHeader label="System Configuration" />
+        <NavItem id="ai-analysis" icon={Brain} label="AI Log Analysis" color="purple" />
+        <NavItem id="ai-history" icon={Clock} label="AI Report History" color="purple" />
         <NavItem id="logs" icon={FileText} label="Event Logs" color="teal" />
         <NavItem id="log-collection" icon={Activity} label="Log Collection" color="teal" />
         <NavItem id="fleet" icon={Server} label="Fleet Management" color="slate" badge="Soon" />

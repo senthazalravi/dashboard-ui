@@ -170,7 +170,7 @@ const VideoMonitoring = () => {
                 setDevices(devicesData);
                 setEvents(eventsData);
                 
-                await saveVideoOverview(devicesData, eventsData);
+                await saveVideoOverview();
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -373,7 +373,7 @@ const VideoMonitoring = () => {
     const streamingDevices = devices.filter(d => d && d.is_streaming).length;
 
     return (
-        <div className="p-6">
+        <div className="min-h-screen bg-slate-900 p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-white mb-2">Video & Imaging Devices</h1>
                 <p className="text-slate-400">Monitor webcams, capture cards, display adapters, and other video devices</p>
@@ -381,40 +381,40 @@ const VideoMonitoring = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Total Devices</p>
+                            <p className="text-slate-300 text-sm">Total Devices</p>
                             <p className="text-2xl font-bold text-white">{devices.length}</p>
                         </div>
-                        <Video className="w-8 h-8 text-slate-600" />
+                        <Video className="w-8 h-8 text-slate-500" />
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Active</p>
+                            <p className="text-slate-300 text-sm">Active</p>
                             <p className="text-2xl font-bold text-emerald-400">{activeDevices}</p>
                         </div>
-                        <CheckCircle className="w-8 h-8 text-emerald-600" />
+                        <CheckCircle className="w-8 h-8 text-emerald-500" />
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Not Available</p>
+                            <p className="text-slate-300 text-sm">Not Available</p>
                             <p className="text-2xl font-bold text-gray-400">{unavailableDevices}</p>
                         </div>
-                        <AlertCircle className="w-8 h-8 text-gray-600" />
+                        <AlertCircle className="w-8 h-8 text-gray-500" />
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Streaming</p>
+                            <p className="text-slate-300 text-sm">Streaming</p>
                             <p className="text-2xl font-bold text-red-400">{streamingDevices}</p>
                         </div>
-                        <Radio className="w-8 h-8 text-red-600" />
+                        <Radio className="w-8 h-8 text-red-500" />
                     </div>
                 </div>
             </div>

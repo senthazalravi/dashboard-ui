@@ -173,7 +173,7 @@ const WirelessMonitoring = () => {
                 setDevices(devicesData);
                 setEvents(eventsData);
                 
-                await saveWirelessOverview(devicesData, eventsData);
+                await saveWirelessOverview();
                 setScanning(false);
             }, 3000);
         } catch (error) {
@@ -400,7 +400,7 @@ const WirelessMonitoring = () => {
     const activeTransmissions = devices.filter(d => d && d.is_active).length;
 
     return (
-        <div className="p-6">
+        <div className="min-h-screen bg-slate-900 p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-white mb-2">Wireless & Covert Channels</h1>
                 <p className="text-slate-400">Monitor Bluetooth, RF emissions, IR devices, and covert communication channels</p>
@@ -408,40 +408,40 @@ const WirelessMonitoring = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Total Devices</p>
+                            <p className="text-slate-300 text-sm">Total Devices</p>
                             <p className="text-2xl font-bold text-white">{devices.length}</p>
                         </div>
-                        <Wifi className="w-8 h-8 text-slate-600" />
+                        <Wifi className="w-8 h-8 text-slate-500" />
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Active</p>
+                            <p className="text-slate-300 text-sm">Active</p>
                             <p className="text-2xl font-bold text-emerald-400">{activeDevices}</p>
                         </div>
-                        <CheckCircle className="w-8 h-8 text-emerald-600" />
+                        <CheckCircle className="w-8 h-8 text-emerald-500" />
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Idle</p>
+                            <p className="text-slate-300 text-sm">Idle</p>
                             <p className="text-2xl font-bold text-yellow-400">{idleDevices}</p>
                         </div>
-                        <AlertCircle className="w-8 h-8 text-yellow-600" />
+                        <AlertCircle className="w-8 h-8 text-yellow-500" />
                     </div>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-slate-400 text-sm">Transmitting</p>
+                            <p className="text-slate-300 text-sm">Transmitting</p>
                             <p className="text-2xl font-bold text-red-400">{activeTransmissions}</p>
                         </div>
-                        <Radio className="w-8 h-8 text-red-600" />
+                        <Radio className="w-8 h-8 text-red-500" />
                     </div>
                 </div>
             </div>
@@ -454,7 +454,7 @@ const WirelessMonitoring = () => {
                         <input
                             type="text"
                             placeholder="Search wireless devices..."
-                            className="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 w-64"
+                            className="pl-10 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 w-64"
                         />
                     </div>
                 </div>
@@ -481,7 +481,7 @@ const WirelessMonitoring = () => {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-slate-800 rounded-lg p-4 border border-slate-700 animate-pulse">
+                        <div key={i} className="bg-slate-800/80 rounded-lg p-4 border border-slate-700 animate-pulse">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 bg-slate-700 rounded-lg animate-pulse"></div>
                                 <div className="flex-1">
@@ -520,7 +520,7 @@ const WirelessMonitoring = () => {
             {/* Recent Events */}
             <div className="mt-8">
                 <h2 className="text-xl font-semibold text-white mb-4">Recent Events</h2>
-                <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                <div className="bg-slate-800/80 rounded-lg border border-slate-700 overflow-hidden">
                     {events.length === 0 ? (
                         <div className="p-8 text-center">
                             <Clock className="w-8 h-8 text-slate-500 mx-auto mb-3" />

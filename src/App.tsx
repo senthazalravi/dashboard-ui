@@ -14,6 +14,8 @@ import PrintingMonitoring from "./components/PrintingMonitoring";
 import SystemOversight from "./components/SystemOversight";
 import FirmwareMonitoring from "./components/FirmwareMonitoring";
 import VirtualLogicalMonitoring from "./components/VirtualLogicalMonitoring";
+import AILogAnalysis from "./components/AILogAnalysis";
+import AIReportHistory from "./components/AIReportHistory";
 import Fleet from "./Fleet";
 import GovernanceSettings from "./components/GovernanceSettings";
 import Login from "./components/Login";
@@ -66,6 +68,8 @@ function App() {
         {activeTab === 'firmware-details' && <FirmwareMonitoring mode="details" />}
         {activeTab === 'virtual-overview' && <VirtualLogicalMonitoring mode="overview" />}
         {activeTab === 'virtual-details' && <VirtualLogicalMonitoring mode="details" />}
+        {activeTab === 'ai-analysis' && <AILogAnalysis />}
+        {activeTab === 'ai-history' && <AIReportHistory />}
         {activeTab === 'logs' && <EventLogs />}
         {activeTab === 'log-collection' && <LogCollection />}
         {activeTab === 'fleet' && <Fleet />}

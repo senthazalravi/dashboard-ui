@@ -407,18 +407,18 @@ export default function FirmwareMonitoring({ mode = "overview" }: { mode?: "over
 
           {mode === "overview" ? (
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="font-bold text-slate-800 tracking-tight">BIOS / Firmware-Level Overview</h3>
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="font-bold text-slate-800 tracking-tight text-lg">BIOS / Firmware-Level Overview</h3>
                 <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full">
                   <Clock className="w-4 h-4 text-slate-500" />
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Continuous Oversight</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">Continuous Oversight</span>
                 </div>
               </div>
-              <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">UEFI Updates</div>
-                  <div className="mt-2 text-sm font-bold text-slate-800">Current: {payload?.uefi_updates?.current_version || "N/A"}</div>
-                  <div className="mt-1 text-xs text-slate-500">Last applied: {payload?.uefi_updates?.last_applied || "N/A"}</div>
+              <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2">UEFI Updates</div>
+                  <div className="mt-2 text-sm font-bold text-slate-800 truncate" title={payload?.uefi_updates?.current_version || "N/A"}>Current: {payload?.uefi_updates?.current_version || "N/A"}</div>
+                  <div className="mt-1 text-xs text-slate-500 truncate" title={payload?.uefi_updates?.last_applied || "N/A"}>Last applied: {payload?.uefi_updates?.last_applied || "N/A"}</div>
                   <div className="mt-3 text-xs">
                     <span className={`px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${payload?.uefi_updates?.pending ? "bg-amber-500/10 text-amber-700 border border-amber-500/20" : "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"}`}>
                       {payload?.uefi_updates?.pending ? "PENDING" : "NO PENDING"}
@@ -426,22 +426,22 @@ export default function FirmwareMonitoring({ mode = "overview" }: { mode?: "over
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Integrity Enforcement</div>
-                  <div className="mt-2 text-sm font-bold text-slate-800">Secure Boot: {payload?.secure_boot?.state || "UNKNOWN"}</div>
-                  <div className="mt-1 text-sm font-bold text-slate-800">TPM: {payload?.tpm?.present ? "PRESENT" : "NOT PRESENT"}</div>
-                  <div className="mt-1 text-xs text-slate-500">Firmware hash: {payload?.firmware_hash?.status || "UNKNOWN"}</div>
+                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2">Integrity Enforcement</div>
+                  <div className="mt-2 text-sm font-bold text-slate-800 truncate" title={payload?.secure_boot?.state || "UNKNOWN"}>Secure Boot: {payload?.secure_boot?.state || "UNKNOWN"}</div>
+                  <div className="mt-1 text-sm font-bold text-slate-800 truncate" title={payload?.tpm?.present ? "PRESENT" : "NOT PRESENT"}>TPM: {payload?.tpm?.present ? "PRESENT" : "NOT PRESENT"}</div>
+                  <div className="mt-1 text-xs text-slate-500 truncate" title={payload?.firmware_hash?.status || "UNKNOWN"}>Firmware hash: {payload?.firmware_hash?.status || "UNKNOWN"}</div>
                 </div>
 
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Firmware Hash Measurements</div>
+                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2">Firmware Hash Measurements</div>
                   <div className="mt-2 text-sm font-bold text-slate-800">Measurements captured: {hashMeasurements.length}</div>
-                  <div className="mt-1 text-xs text-slate-500">Baseline: {payload?.firmware_hash?.baseline_id || "N/A"}</div>
+                  <div className="mt-1 text-xs text-slate-500 truncate" title={payload?.firmware_hash?.baseline_id || "N/A"}>Baseline: {payload?.firmware_hash?.baseline_id || "N/A"}</div>
                 </div>
 
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Option ROM Loading</div>
-                  <div className="mt-2 text-sm font-bold text-slate-800">Policy: {payload?.option_rom?.policy || "UNKNOWN"}</div>
+                <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-2">Option ROM Loading</div>
+                  <div className="mt-2 text-sm font-bold text-slate-800 truncate" title={payload?.option_rom?.policy || "UNKNOWN"}>Policy: {payload?.option_rom?.policy || "UNKNOWN"}</div>
                   <div className="mt-1 text-xs text-slate-500">Observed events: {optionRomEvents.length}</div>
                 </div>
               </div>

@@ -187,7 +187,7 @@ const PrintingMonitoring = () => {
                 setDevices(devicesData);
                 setEvents(eventsData);
                 
-                await savePrintingOverview(devicesData, eventsData);
+                await savePrintingOverview();
                 setScanning(false);
             }, 3000);
         } catch (error) {

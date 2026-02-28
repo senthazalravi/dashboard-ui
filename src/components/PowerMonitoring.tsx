@@ -175,7 +175,7 @@ const PowerMonitoring = () => {
                 setDevices(devicesData);
                 setEvents(eventsData);
                 
-                await savePowerOverview(devicesData, eventsData);
+                await savePowerOverview();
                 setScanning(false);
             }, 3000);
         } catch (error) {
